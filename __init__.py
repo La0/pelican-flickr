@@ -1,1 +1,1 @@
-from flickr import *
+from main import *
