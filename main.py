@@ -37,9 +37,9 @@ def init_flickr(sender):
   for setting, conf in settings.items():
     try:
       val = sender.settings[setting]
-      if conf['mandatory'] and not val:
-        raise Exception('Missing %s settings' % setting)
     except KeyError:
+      if conf['mandatory']:
+        raise Exception('Missing %s settings' % setting)
       val = conf['default']
     globals()[setting] = val
     logger.debug('Read setting %s = %s' % (setting, val))
