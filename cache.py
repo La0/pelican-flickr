@@ -21,7 +21,7 @@ class FlickrCache:
     # Setup cache dir
     if not self.cache_dir:
       self.cache_dir = os.path.join(tempfile.gettempdir(), 'pelican_flickr')
-    if not os.path.isdir(self.cache_dir):
+    if main.FLICKR_CACHE and not os.path.isdir(self.cache_dir):
       os.mkdir(self.cache_dir)
 
     # Init flickr api
@@ -36,7 +36,6 @@ class FlickrCache:
     sets = self.api.photosets_getList(user_id=main.FLICKR_USER)
     for photoset in sets.find('photosets').findall('photoset'):
       # TODO: handle includes / excludes
-      from xml.etree.ElementTree import dump
       data = photoset.attrib
 
       # Check cache
@@ -51,10 +50,10 @@ class FlickrCache:
         data['description'] = photoset.find('title').text
         data.update(self.build_paths(data['title']))
         logger.info("Update Flickr photoset '%s'" % data['title'])
-        self.save(data['id'], data)
 
         # Fetch new photos
-        self.build_photos(data['id'])
+        data['photos'] = self.build_photos(data['id'])
+        self.save(data['id'], data)
 
       self.sets.append(data)
 
@@ -62,15 +61,25 @@ class FlickrCache:
     '''
     Load all photos from a given photoset
     '''
+    photoset = []
     photos = self.api.photosets_getPhotos(photoset_id=set_id, media='photos')
+    for xml in photos.find('photoset').findall('photo'):
+      data = xml.attrib
 
-    # Debug
-    for photo in photos.find('photoset').findall('photo'):
-      data = photo.attrib
-      self.photos.append(data)
+      # Fetch sizes, indexed per name
+      sizes = self.api.photos_getSizes(photo_id=data['id'])
+      data['sizes'] = {}
+      for xml in sizes.find('sizes').findall('size'):
+        size = xml.attrib
+        slug = slugify(size['label'])
+        data['sizes'][slug] = size
 
-      # Save in cache
+      # Save
       self.save(data['id'], data)
+      self.photos.append(data)
+      photoset.append(data)
+
+    return photoset
 
   def build_paths(self, title):
     '''
@@ -88,6 +97,9 @@ class FlickrCache:
     '''
     Get a data set from cache
     '''
+    if not main.FLICKR_CACHE:
+      return False
+
     path = self.get_cache_path(name)
     if not os.path.exists(path):
       return False
@@ -98,8 +110,12 @@ class FlickrCache:
     '''
     Save a serializable data set in local cache
     '''
+    if not main.FLICKR_CACHE:
+      return False
+
     with open(self.get_cache_path(name), 'w') as f:
       f.write(json.dumps(data))
+    return True
 
   def get_cache_path(self, name):
     return os.path.join(self.cache_dir, '%s.json' % name)

@@ -28,13 +28,20 @@ def init_flickr(sender):
     'FLICKR_OUTPUT_DIRNAME' : {
       'mandatory' : False,
       'default' : 'flickr',
-    }
+    },
+    'FLICKR_CACHE' : {
+      'mandatory' : False,
+      'default' : True,
+    },
   }
   for setting, conf in settings.items():
-    val = sender.settings.get(setting, None)
-    if conf['mandatory'] and not val:
-      raise Exception('Missing %s settings' % setting)
-    globals()[setting] = val or conf['default']
+    try:
+      val = sender.settings[setting]
+      if conf['mandatory'] and not val:
+        raise Exception('Missing %s settings' % setting)
+    except KeyError:
+      val = conf['default']
+    globals()[setting] = val
     logger.debug('Read setting %s = %s' % (setting, val))
 
   # Init cache
