@@ -48,13 +48,13 @@ class FlickrCache:
         # Update from api data
         data['title'] = photoset.find('title').text
         data['description'] = photoset.find('title').text
-        data.update(self.build_paths(data['title']))
         logger.info("Update Flickr photoset '%s'" % data['title'])
 
         # Fetch new photos
         data['photos'] = self.build_photos(data['id'])
         self.save(data['id'], data)
 
+      data.update(self.build_paths(data['title']))
       self.sets.append(data)
 
   def build_photos(self, set_id):
@@ -71,7 +71,7 @@ class FlickrCache:
       data['sizes'] = {}
       for xml in sizes.find('sizes').findall('size'):
         size = xml.attrib
-        slug = slugify(size['label'])
+        slug = slugify(size['label'], ((' ', ''),))
         data['sizes'][slug] = size
 
       # Save
