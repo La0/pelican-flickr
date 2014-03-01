@@ -93,6 +93,14 @@ class FlickrCache:
       'url' : '/' + path,
     }
 
+  def export(self):
+    '''
+    Export cache in templates context
+    '''
+    return {
+      'flickr_sets' : self.sets,
+    }
+
   def fetch(self, name):
     '''
     Get a data set from cache

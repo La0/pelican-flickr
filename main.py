@@ -11,9 +11,13 @@ logger = logging.getLogger(__name__)
 def register():
   signals.initialized.connect(init_flickr)
   signals.get_generators.connect(add_generator)
+  signals.page_generator_context.connect(add_context)
 
 def add_generator(generators):
   return FlickrGenerator
+
+def add_context(generator, metadata):
+  generator.context.update(FLICKR_CACHE.export())
 
 def init_flickr(sender):
 
