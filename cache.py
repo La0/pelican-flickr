@@ -50,17 +50,19 @@ class FlickrCache:
         data['description'] = photoset.find('title').text
         logger.info("Update Flickr photoset '%s'" % data['title'])
 
-        # Fetch new photos
-        data['photos'] = self.build_photos(data['id'])
+        # Fetch new photos, identifying the primary photo
+        data.update(self.build_photos(data['id'], data['primary']))
+
         self.save(data['id'], data)
 
       data.update(self.build_paths(data['title']))
       self.sets.append(data)
 
-  def build_photos(self, set_id):
+  def build_photos(self, set_id, primary_id):
     '''
     Load all photos from a given photoset
     '''
+    primary = None
     photoset = []
     photos = self.api.photosets_getPhotos(photoset_id=set_id, media='photos')
     for xml in photos.find('photoset').findall('photo'):
@@ -79,7 +81,14 @@ class FlickrCache:
       self.photos.append(data)
       photoset.append(data)
 
-    return photoset
+      # Check primary
+      if data['id'] == primary_id:
+        primary = data
+
+    return {
+      'photos' : photoset,
+      'primary' : primary,
+    }
 
   def build_paths(self, title):
     '''
