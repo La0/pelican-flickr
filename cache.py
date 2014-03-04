@@ -16,6 +16,9 @@ class FlickrCache:
   sets = []
   photos = []
 
+  # Exclusions
+  sets_exclude = None
+
   def __init__(self):
 
     # Setup cache dir
@@ -27,6 +30,9 @@ class FlickrCache:
     # Init flickr api
     self.api = flickrapi.FlickrAPI(main.FLICKR_API_KEY)
 
+    # Setup includes / excludes
+    self.sets_exclude = main.FLICKR_SETS_EXCLUDE
+
   def build(self):
     '''
     Build cache using data from flickr api
@@ -35,25 +41,32 @@ class FlickrCache:
     # Get photosets
     sets = self.api.photosets_getList(user_id=main.FLICKR_USER)
     for photoset in sets.find('photosets').findall('photoset'):
-      # TODO: handle includes / excludes
       data = photoset.attrib
 
       # Check cache
       cache = self.fetch(data['id'])
+      use_cache = False
       if cache and cache['date_update'] == data['date_update']:
         data = cache
-        logger.info("Cached Flickr photoset '%s'" % data['title'])
+        use_cache = True
 
       else:
         # Update from api data
         data['title'] = photoset.find('title').text
         data['description'] = photoset.find('title').text
-        logger.info("Update Flickr photoset '%s'" % data['title'])
 
         # Fetch new photos, identifying the primary photo
         data.update(self.build_photos(data['id'], data['primary']))
 
+      # Check excludes
+      if self.sets_exclude and (data['id'] in self.sets_exclude or data['title'] in self.sets_exclude):
+        logger.info("Excludes Flickr set '%s'" % (data['title']))
+        continue
+
+      # Save in cache only when not already there
+      if not use_cache:
         self.save(data['id'], data)
+      logger.info("Use Flickr photoset '%s' from %s" % (data['title'], use_cache and 'cache' or 'flickr'))
 
       data.update(self.build_paths(data['title']))
       self.sets.append(data)
