@@ -55,21 +55,26 @@ class FlickrCache:
         data['title'] = photoset.find('title').text
         data['description'] = photoset.find('title').text
 
-        # Fetch new photos, identifying the primary photo
-        data.update(self.build_photos(data['id'], data['primary']))
-
       # Check excludes
       if self.sets_exclude and (data['id'] in self.sets_exclude or data['title'] in self.sets_exclude):
         logger.info("Excludes Flickr set '%s'" % (data['title']))
         continue
 
-      # Save in cache only when not already there
       if not use_cache:
+
+        # Fetch new photos, identifying the primary photo
+        data.update(self.build_photos(data['id'], data['primary']))
+
+        # Save in cache only when not already there
         self.save(data['id'], data)
+
       logger.info("Use Flickr photoset '%s' from %s" % (data['title'], use_cache and 'cache' or 'flickr'))
 
       data.update(self.build_paths(data['title']))
       self.sets.append(data)
+
+    # Save photosets id list
+    self.save('photosets', [s['id'] for s in self.sets])
 
   def build_photos(self, set_id, primary_id):
     '''
