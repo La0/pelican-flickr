@@ -1,0 +1,48 @@
+import json
+import os
+import tempfile
+import main
+
+class FlickrCached(object):
+  '''
+  Helper methods to cache objects
+  '''
+  id = None
+  path = ''
+  data = {}
+  cached = True
+
+  def __init__(self, cache_id):
+    self.id = cache_id
+
+    # Setup cache dir
+    cache_dir = os.path.join(tempfile.gettempdir(), 'pelican_flickr')
+    if main.FLICKR_CACHE and not os.path.isdir(cache_dir):
+      os.mkdir(cache_dir)
+
+    # Setup final cache path for object
+    self.path = os.path.join(cache_dir, '%s.json' % self.id)
+
+  def fetch(self):
+    '''
+    Get a data set from cache
+    '''
+    if not main.FLICKR_CACHE:
+      return False
+
+    if not os.path.exists(self.path):
+      return False
+    with open(self.path, 'r') as f:
+      self.data = json.loads(f.read())
+    return True
+
+  def save(self):
+    '''
+    Save a serializable data set in local cache
+    '''
+    if not main.FLICKR_CACHE:
+      return False
+
+    with open(self.path, 'w') as f:
+      f.write(json.dumps(self.data))
+    return True

@@ -33,6 +33,10 @@ def init_flickr(sender):
       'mandatory' : False,
       'default' : 'flickr',
     },
+    'FLICKR_UPDATE' : {
+      'mandatory' : False,
+      'default' : True,
+    },
     'FLICKR_CACHE' : {
       'mandatory' : False,
       'default' : True,
