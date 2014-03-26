@@ -33,8 +33,8 @@ class FlickrPhotoset(FlickrCached):
     else:
       raise Exception('Specify xml source or photoset id.')
 
-    # Always update title
-    self.build_paths()
+    # Always update paths
+    self.build_paths((slugify(self.title), ))
 
   def __unicode__(self):
     return u"Flickr Photoset %s '%s'" % (self.id, self.title)
@@ -44,16 +44,6 @@ class FlickrPhotoset(FlickrCached):
 
   def __getitem__(self, name):
     return self.data.get(name, None)
-
-  def build_paths(self):
-    # Build path, url, and slug for a cache object
-    slug = slugify(self.title)
-    path = '%s/%s.html' % (main.FLICKR_OUTPUT_DIRNAME, slug)
-    self.data.update({
-      'slug' : slug,
-      'path' : path,
-      'url' : '/' + path,
-    })
 
   def load_photos(self, api):
     '''
@@ -72,7 +62,7 @@ class FlickrPhotoset(FlickrCached):
 
     for i, xml in enumerate(xml_photos):
       photo_id = type(xml) == unicode and xml or xml.attrib['id']
-      photo = FlickrPhoto(photo_id, api)
+      photo = FlickrPhoto(photo_id, api, self)
       logger.debug(u'%d/%d %s from %s' % (i+1, len(xml_photos), photo, photo.cached and 'cache' or 'flickr'))
 
       # Save photo
@@ -94,9 +84,11 @@ class FlickrPhotoset(FlickrCached):
 
 class FlickrPhoto(FlickrCached):
   api = None
+  photoset = None
 
-  def __init__(self, id, api):
+  def __init__(self, id, api, photoset):
     self.api = api
+    self.photoset = photoset
     super(FlickrPhoto, self).__init__(id)
     self.fetch()
 
@@ -116,12 +108,18 @@ class FlickrPhoto(FlickrCached):
     except:
       pass
 
+    # Always update paths
+    self.build_paths((self.photoset.slug, self.id, ))
+
   def __unicode__(self):
     return u"Flickr Photo %s '%s'" % (self.id, 'infos' in self.data and self.data['infos']['title'] or '-')
 
+  def __getattr__(self, name):
+    return self.__getitem__(name)
+
   def __getitem__(self, name):
     if name in self.data.get('infos', {}):
-      return self.data[name]
+      return self.data['infos'][name]
     return self.data.get(name, None)
 
   def load_infos(self):

@@ -4,8 +4,7 @@
 
 <h1>{{ photoset.title }}</h1>
 {% for photo in photoset.photos %}
-{{ photo }}
-  <a href="{{photo.sizes.original.source}}">
+  <a href="{{photo.url}}">
     <img src="{{photo.sizes.largesquare.source}}" title="{{photo.title}}" />
   </a>
 {% endfor %}
