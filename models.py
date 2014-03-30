@@ -105,7 +105,8 @@ class FlickrPhoto(FlickrCached):
           'infos' : infos,
           'sizes' : self.load_sizes(),
         }
-    except:
+    except Exception, e:
+      print str(e)
       pass
 
     # Always update paths
@@ -132,6 +133,19 @@ class FlickrPhoto(FlickrCached):
     out['title'] = xml.find('title').text
     out['description'] = xml.find('description').text
     out['dates'] = xml.find('dates').attrib
+
+    # Load urls
+    out['urls'] = {}
+    for url_xml in xml.find('urls').findall('url'):
+      out['urls'][url_xml.attrib['type']] = url_xml.text
+
+    # Load tags
+    out['tags'] = []
+    for tag_xml in xml.find('tags').findall('tag'):
+      tag = tag_xml.attrib
+      tag['tag'] = tag_xml.text
+      out['tags'].append(tag)
+
     return out
 
   def load_sizes(self):

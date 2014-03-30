@@ -14,7 +14,17 @@
   {% endif %}
 </p>
 <p>
+  View on <a href="{{ photo.urls.photopage }}">Flickr</a>
+</p>
+<p>
   Taken on {{ photo.dates.taken }}
+</p>
+
+<p>
+Tags: 
+{% for tag in photo.tags %}
+{{ tag.tag }}{% if loop.last %}.{% else %}, {% endif %}
+{% endfor %}
 </p>
 
 {% if photo_next %}
