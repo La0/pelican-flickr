@@ -23,8 +23,10 @@ class FlickrGenerator(generators.Generator):
     '''
     for photoset in main.FLICKR_CACHE.sets:
       self.generate_photoset(writer, photoset)
-      for photo in photoset.photos:
-        self.generate_photo(writer, photo)
+      for i,photo in enumerate(photoset.photos):
+        previous = i-1 > 0 and photoset.photos[i-1] or None
+        next = i+1 < len(photoset.photos) and photoset.photos[i+1] or None
+        self.generate_photo(writer, photo, next, previous)
 
   def generate_photoset(self, writer, photoset):
     '''
@@ -35,11 +37,13 @@ class FlickrGenerator(generators.Generator):
     rurls = self.settings['RELATIVE_URLS']
     writer.write_file(photoset.generated_path, template, self.context, rurls, override_output=True)
 
-  def generate_photo(self, writer, photo):
+  def generate_photo(self, writer, photo, next=None, previous=None):
     '''
     Generate Flickr photo page
     '''
     self.context['photo'] = photo
+    self.context['photo_next'] = next
+    self.context['photo_previous'] = previous
     template = self.env.get_template(self.template_photo)
     rurls = self.settings['RELATIVE_URLS']
     writer.write_file(photo.generated_path, template, self.context, rurls, override_output=True)
