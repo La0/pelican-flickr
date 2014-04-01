@@ -62,7 +62,11 @@ class FlickrPhotoset(FlickrCached):
 
     for i, xml in enumerate(xml_photos):
       photo_id = type(xml) == unicode and xml or xml.attrib['id']
-      photo = FlickrPhoto(photo_id, api, self)
+      try:
+        photo = FlickrPhoto(photo_id, api, self)
+      except Exception, e:
+        logger.error('%d/%d Failed loading of %s : %s', i+1, len(xml_photos), photo_id, str(e))
+        continue
       logger.debug(u'%d/%d %s from %s' % (i+1, len(xml_photos), photo, photo.cached and 'cache' or 'flickr'))
 
       # Save photo
@@ -92,12 +96,20 @@ class FlickrPhoto(FlickrCached):
     super(FlickrPhoto, self).__init__(id)
     self.fetch()
 
-    # Check cache
-    try:
-      # Update authorized ?
-      if not main.FLICKR_UPDATE:
-        raise Exception('No flickr update authorized from settings.')
+    # Update authorized ?
+    if main.FLICKR_UPDATE:
+      self.load_from_flickr()
 
+    # Check data
+    if not self.data:
+      raise Exception('No data available')
+
+    # Always update paths
+    self.build_paths((self.photoset.slug, self.id, ))
+
+  def load_from_flickr(self):
+    # Load data from flickr
+    try:
       infos = self.load_infos()
       if not self.data or infos['dates']['lastupdate'] != self.data['infos']['dates']['lastupdate']:
         self.cached = False
@@ -106,11 +118,7 @@ class FlickrPhoto(FlickrCached):
           'sizes' : self.load_sizes(),
         }
     except Exception, e:
-      print str(e)
-      pass
-
-    # Always update paths
-    self.build_paths((self.photoset.slug, self.id, ))
+      logger.error(str(e))
 
   def __unicode__(self):
     return u"Flickr Photo %s '%s'" % (self.id, 'infos' in self.data and self.data['infos']['title'] or '-')

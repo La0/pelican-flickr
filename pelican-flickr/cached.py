@@ -39,6 +39,10 @@ class FlickrCached(object):
       return False
     with open(self.cache_path, 'r') as f:
       self.data = json.loads(f.read())
+
+    # Check data
+    if not self.data:
+      raise Exception('No data from %s' % self.cache_path)
     return True
 
   def save(self):
