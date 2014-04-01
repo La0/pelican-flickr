@@ -7,7 +7,7 @@ This `Pelican <http://getpelican.com>`_ plugin brings your Flickr photos
 Install
 -------
 
-*TODO pip*
+Install this plugin and its dependencies with ``pip install pelican-flickr``
 
 Add the plugin path to your **PLUGINS** setting in the pelicanconf.py
 file. ``PLUGINS = ['pelicanflickr', ]`` You must setup at least two
@@ -19,6 +19,8 @@ Finally, you can run ``pelican`` to render your website.
 For the first run, as the cache is empty and can be quite long to
 populate i recommend using ``pelican --debug`` to see what is
 happening...
+
+You can view a demo on my `Personal Website` <http://bastien.abadie.me>
 
 Settings
 --------

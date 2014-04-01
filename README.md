@@ -2,7 +2,8 @@
 This [Pelican] plugin brings your Flickr photos & sets into your static website.
 
 ## Install
-*TODO pip*
+
+Install this plugin and its dependencies with ```pip install pelican-flickr```
 
 Add the plugin path to your **PLUGINS** setting in the pelicanconf.py file.
 ```
@@ -15,6 +16,8 @@ You must setup at least two settings for this plugin to work (see Settings secti
 Finally, you can run ```pelican``` to render your website.
 
 For the first run, as the cache is empty and can be quite long to populate i recommend using ```pelican --debug``` to see what is happening...
+
+You can view a demo on my [Personal Website]
 
 ## Settings
 The following settings should be specified in your pelican configuration file, usually ```pelicanconf.py```
@@ -109,3 +112,4 @@ You can override the default ```flickr_photo.html``` by adding a file with the s
 [Flickr]: http://flickr.com
 [idGettr]: http://idgettr.com/(env)
 [Api key]: https://www.flickr.com/services/apps/create/apply
+[Personal Website]: http://bastien.abadie.me
