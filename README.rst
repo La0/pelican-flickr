@@ -10,7 +10,7 @@ Install
 Install this plugin and its dependencies with ``pip install pelican-flickr``
 
 Add the plugin path to your **PLUGINS** setting in the pelicanconf.py
-file. ``PLUGINS = ['pelicanflickr', ]`` You must setup at least two
+file. ``PLUGINS = ['pelican-flickr', ]`` You must setup at least two
 settings for this plugin to work (see Settings section for more
 details): \* FLICKR\_API\_KEY \* FLICKR\_USER
 
@@ -115,7 +115,7 @@ Photosets
 ~~~~~~~~~
 
 Every photoset available will have a file generated in the
-``FLICKR_OUPTUT_DIRNAME``
+``FLICKR_OUTPUT_DIRNAME``
 
 A variable named **photoset** is added to this page's context. This
 plugin embeds a default template ``flickr_set.html`` that you can
@@ -130,11 +130,13 @@ Here is basically the content of the default file: ::
     </a>
   {% endfor %}
 
+A photoset has an instance of a photo named primary which is the cover p
+
 Photos
 ~~~~~~
 
 As for the photo sets, each available photo generates a page, in a
-subfolder per photoset of ``FLICKR_OUPTUT_DIRNAME`` (ie.
+subfolder per photoset of ``FLICKR_OUTPUT_DIRNAME`` (ie.
 output/flickr/my-set/425169.html for the photo with id 425169).
 
 Several variables are added to the page context:
@@ -145,6 +147,12 @@ Several variables are added to the page context:
    parent set (may be null)
 -  ``photo_next`` is the possible next photo object in the parent set
    (may be null)
+
+Each photo has several attributes:
+
+-  sizes is a dictionary of available image size with their direct urls
+-  tags is a list of Flickr tag (not yet asociated with Pelican tags)
+-  urls is a dictionary of Flickr urls about this photo
 
 You can override the default ``flickr_photo.html`` by adding a file with
 the same name in your template dir.

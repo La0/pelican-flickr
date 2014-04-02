@@ -7,7 +7,7 @@ Install this plugin and its dependencies with ```pip install pelican-flickr```
 
 Add the plugin path to your **PLUGINS** setting in the pelicanconf.py file.
 ```
-PLUGINS = ['pelicanflickr', ]
+PLUGINS = ['pelican-flickr', ]
 ```
 You must setup at least two settings for this plugin to work (see Settings section for more details):
  * FLICKR_API_KEY
@@ -80,7 +80,7 @@ You can access all your Flickr photosets from any generated page using the ```fl
 ```
 
 ### Photosets
-Every photoset available will have a file generated in the ```FLICKR_OUPTUT_DIRNAME```
+Every photoset available will have a file generated in the ```FLICKR_OUTPUT_DIRNAME```
 
 A variable named **photoset** is added to this page's context.
 This plugin embeds a default template ```flickr_set.html``` that you can override by creating a file in your template dir with the same name.
@@ -96,8 +96,10 @@ Here is basically the content of the default file:
 {% endblock %}
 ```
 
+A photoset has an instance of a photo named **primary** which is the cover picture of the set.
+
 ### Photos
-As for the photo sets, each available photo generates a page, in a subfolder per photoset of ```FLICKR_OUPTUT_DIRNAME``` (ie. output/flickr/my-set/425169.html for the photo with id 425169).
+As for the photo sets, each available photo generates a page, in a subfolder per photoset of ```FLICKR_OUTPUT_DIRNAME``` (ie. output/flickr/my-set/425169.html for the photo with id 425169).
 
 Several variables are added to the page context:
 
@@ -105,6 +107,12 @@ Several variables are added to the page context:
  * ```photo``` is the current photo object
  * ```photo_previous``` is the possible previous photo object in the parent set (may be null)
  * ```photo_next``` is the possible next photo object in the parent set (may be null)
+
+Each photo has several attributes:
+
+ * **sizes** is a dictionary of available image size with their direct urls
+ * **tags** is a list of Flickr tag (not yet asociated with Pelican tags)
+ * **urls** is a dictionary of Flickr urls about this photo
 
 You can override the default ```flickr_photo.html``` by adding a file with the same name in your template dir.
 
