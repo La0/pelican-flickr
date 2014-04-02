@@ -6,7 +6,7 @@ except ImportError:
 setup(
   name='pelican-flickr',
   packages=['pelican-flickr', ],
-  version='0.1',
+  version='0.1.1',
   author='Bastien Abadie',
   author_email='bastien.abadie@gmail.com',
   url='https://github.com/La0/pelican-flickr',
