@@ -22,7 +22,8 @@ class FlickrCache:
   def __init__(self):
 
     # Init flickr api
-    self.api = flickrapi.FlickrAPI(main.FLICKR_API_KEY)
+    self.api = flickrapi.FlickrAPI(main.FLICKR_API_KEY, main.FLICKR_API_SECRET)
+    self.auth()
 
     # Setup includes / excludes
     self.sets_exclude = main.FLICKR_SETS_EXCLUDE
@@ -30,6 +31,21 @@ class FlickrCache:
     # Setup cached sets ids
     self.sets_cached = FlickrCached('photosets')
     self.sets_cached.fetch()
+
+  def auth(self):
+    '''
+    Authenticate using Oauth
+    '''
+    def _auth_cb(frob, perms):
+      print 'Please give us %s permissions by using this link in your web browser: %s' % (perms, self.api.auth_url(perms, frob))
+
+    # Follow frob on flickr.com
+    token, frob = self.api.get_token_part_one(perms='read', auth_callback=_auth_cb)
+    if not token:
+      raw_input("Press ENTER after you authorized this program")
+
+    # Finish auth
+    self.api.get_token_part_two((token, frob))
 
   def load_photosets(self):
     '''
@@ -43,7 +59,7 @@ class FlickrCache:
 
       # Try loading from Flickr
       logger.debug("Fetching Flickr photosets online...")
-      sets = self.api.photosets_getList(user_id=main.FLICKR_USER)
+      sets = self.api.photosets_getList()
       for photoset in sets.find('photosets').findall('photoset'):
         s = FlickrPhotoset(xml=photoset)
         if self.sets_exclude and (s.id in self.sets_exclude or s.title in self.sets_exclude):

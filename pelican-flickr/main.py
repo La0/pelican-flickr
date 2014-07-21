@@ -26,7 +26,7 @@ def init_flickr(sender):
     'FLICKR_API_KEY' : {
       'mandatory' : True,
     },
-    'FLICKR_USER' : {
+    'FLICKR_API_SECRET' : {
       'mandatory' : True,
     },
     'FLICKR_OUTPUT_DIRNAME' : {
