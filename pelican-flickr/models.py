@@ -11,6 +11,7 @@ class FlickrPhotoset(FlickrCached):
   Represents & Cache a Flickr Photoset
   '''
   primary = None
+  private = False
   photos = []
 
   def __init__(self, xml=None, id=None):
@@ -33,8 +34,8 @@ class FlickrPhotoset(FlickrCached):
     else:
       raise Exception('Specify xml source or photoset id.')
 
-    # Always update paths
-    self.build_paths((slugify(self.title), ))
+    # By default, build public paths
+    self.build_paths((slugify(self.title),))
 
   def __unicode__(self):
     return u"Flickr Photoset %s '%s'" % (self.id, self.title)
@@ -44,6 +45,20 @@ class FlickrPhotoset(FlickrCached):
 
   def __getitem__(self, name):
     return self.data.get(name, None)
+
+  def set_privacy(self, private=False):
+    '''
+    Build with private photos in protected folder
+    '''
+    self.private = private
+    prefix = self.private and 'private/' or ''
+    parts = [slugify(self.title),]
+    self.build_paths(parts, prefix=prefix)
+    for p in self.photos:
+      p.build_paths([self.slug, p.id], prefix=prefix)
+
+  def get_visible_photos(self):
+    return [p for p in self.photos if p.is_visible()]
 
   def load_photos(self, api):
     '''
@@ -104,8 +119,10 @@ class FlickrPhoto(FlickrCached):
     if not self.data:
       raise Exception('No data available')
 
-    # Always update paths
-    self.build_paths((self.photoset.slug, self.id, ))
+  def is_visible(self):
+    # Not visible when private and
+    # photoset is not private
+    return ('public' in self.visibility) ^ self.photoset.private
 
   def load_from_flickr(self):
     # Load data from flickr

@@ -18,14 +18,20 @@ class FlickrGenerator(generators.Generator):
     super(FlickrGenerator, self).__init__(context, settings, path, theme, output_path, **kwargs)
 
   def generate_output(self, writer):
+    self.generate_photosets(writer, False) # Public photos
+    self.generate_photosets(writer, True) # Private photos
+
+  def generate_photosets(self, writer, private=False):
     '''
     Generate photosets & photos
     '''
     for photoset in main.FLICKR_CACHE.sets:
+      photoset.set_privacy(private)
       self.generate_photoset(writer, photoset)
-      for i,photo in enumerate(photoset.photos):
-        previous = i-1 > 0 and photoset.photos[i-1] or None
-        next = i+1 < len(photoset.photos) and photoset.photos[i+1] or None
+      photos = photoset.get_visible_photos()
+      for i,photo in enumerate(photos):
+        previous = i-1 >= 0 and photos[i-1] or None
+        next = i+1 < len(photos) and photos[i+1] or None
         self.generate_photo(writer, photo, next, previous)
 
   def generate_photoset(self, writer, photoset):
@@ -41,6 +47,9 @@ class FlickrGenerator(generators.Generator):
     '''
     Generate Flickr photo page
     '''
+    if not photo.is_visible():
+      return
+
     self.context['photo'] = photo
     self.context['photo_next'] = next
     self.context['photo_previous'] = previous
