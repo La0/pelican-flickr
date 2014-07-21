@@ -142,6 +142,9 @@ class FlickrPhoto(FlickrCached):
     out['description'] = xml.find('description').text
     out['dates'] = xml.find('dates').attrib
 
+    # Load visibility
+    out['visibility'] = [k[2:] for k,v in xml.find('visibility').attrib.items() if int(v) == 1]
+
     # Load urls
     out['urls'] = {}
     for url_xml in xml.find('urls').findall('url'):
